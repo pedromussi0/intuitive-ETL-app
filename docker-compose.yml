@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres:15 
+    container_name: intuitive_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${DB_PORT_HOST}:5432" # Expose PostgreSQL port to host machine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data
+      - ./services/database/sql:/docker-entrypoint-initdb.d # Executes *.sql scripts on first run
+    networks:
+      - intuitive-net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  intuitive-net:
+    driver: bridge

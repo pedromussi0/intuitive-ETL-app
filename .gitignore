@@ -1,2 +1,16 @@
 .env
-services/servicesenv
+services/venv
+.env
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+build/
+dist/
+*.egg-info/
+venv/
+.vscode/
+data/raw/ # Usually large and downloaded on demand
+data/processed/
+*.log
+db_source
