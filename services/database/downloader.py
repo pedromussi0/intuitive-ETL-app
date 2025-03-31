@@ -1,5 +1,3 @@
-# services/database/downloader.py
-
 import os
 import requests
 from urllib.parse import urljoin
@@ -19,7 +17,7 @@ DOWNLOAD_DIR = os.path.join(BASE_DIR, 'data', 'raw', 'db_source')
 ACCOUNTING_DATA_URL = "https://dadosabertos.ans.gov.br/FTP/PDA/demonstracoes_contabeis/"
 OPERATORS_DATA_URL = "https://dadosabertos.ans.gov.br/FTP/PDA/operadoras_de_plano_de_saude_ativas/"
 
-# Explicitly define the years we need
+
 TARGET_YEARS = [2023, 2024]
 # --- End Configuration ---
 
@@ -29,7 +27,7 @@ def download_file(url, target_path):
         # Add headers to mimic a browser request, sometimes helps
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
         response = requests.get(url, stream=True, headers=headers, timeout=60) # Added headers and timeout
-        response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+        response.raise_for_status()  
         with open(target_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
@@ -56,12 +54,7 @@ def unzip_file(zip_path, extract_to_dir):
             zip_ref.extractall(extract_to_dir)
             extracted_files = zip_ref.namelist()
         logging.info(f"Successfully unzipped: {os.path.basename(zip_path)} to {extract_to_dir}. Extracted: {extracted_files}")
-        # Optionally remove the zip file after extraction
-        # try:
-        #     os.remove(zip_path)
-        #     logging.info(f"Removed zip file: {os.path.basename(zip_path)}")
-        # except OSError as e:
-        #     logging.warning(f"Could not remove zip file {zip_path}: {e}")
+
         return True
     except zipfile.BadZipFile:
         logging.error(f"Error: {zip_path} is not a zip file or is corrupted.")
@@ -80,7 +73,7 @@ def download_accounting_data(base_url, target_dir, years_to_download):
         logging.info(f"Accessing directory for year {year}: {year_url}")
 
         try:
-            headers = {'User-Agent': 'Mozilla/5.0'} # Mimic browser
+            headers = {'User-Agent': 'Mozilla/5.0'} 
             dir_response = requests.get(year_url, headers=headers, timeout=30)
             dir_response.raise_for_status() # Check for 4xx/5xx errors
             dir_soup = BeautifulSoup(dir_response.text, 'html.parser')

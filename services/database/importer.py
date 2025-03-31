@@ -1,4 +1,3 @@
-# services/database/importer.py
 import os
 import csv
 import glob
@@ -20,7 +19,7 @@ load_dotenv(dotenv_path=dotenv_path)
 DB_NAME = os.getenv("POSTGRES_DB", "ans_data")
 DB_USER = os.getenv("POSTGRES_USER", "ans_user")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD") 
-DB_HOST = os.getenv("DB_HOST", "db") # Default to 'db' service name
+DB_HOST = os.getenv("DB_HOST", "db") 
 
 try:
     DB_PORT = os.getenv("DB_PORT_HOST")
@@ -34,7 +33,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, 'data', 'raw', 'db_source')
 OPERATOR_FILE_PATTERN = "Relatorio_cadop*.csv"
 ACCOUNTING_FILE_PATTERN = "*T*.csv" # Matches quarterly files like 1T2023.csv
-FILE_ENCODING = 'utf-8' # Verify this based on actual downloaded files
+FILE_ENCODING = 'utf-8' 
 DELIMITER = ';'
 # ---
 
@@ -122,7 +121,7 @@ def import_operadoras(conn, file_path):
                 VALUES ({placeholders})
                 ON CONFLICT (Registro_ANS) DO NOTHING;
             """
-            # ON CONFLICT is PostgreSQL specific for handling duplicates
+            
 
             for row_num, row in enumerate(reader, 1):
                 try:
@@ -141,8 +140,7 @@ def import_operadoras(conn, file_path):
                         skipped_count += 1
                         continue
 
-                    # Map CSV fields (case-insensitive keys if needed) to the SQL columns order
-                    # Be careful with exact key names from CSV header
+                   
                     data_tuple = (
                         reg_ans, row.get('CNPJ'), row.get('Razao_Social'), row.get('Nome_Fantasia'), row.get('Modalidade'),
                         row.get('Logradouro'), row.get('Numero'), row.get('Complemento'), row.get('Bairro'), row.get('Cidade'),
@@ -159,11 +157,11 @@ def import_operadoras(conn, file_path):
                 except (ValueError, TypeError, KeyError) as data_error:
                     logging.error(f"Error processing row {row_num}: {row} - {data_error}")
                     skipped_count += 1
-                    # Continue with next row - do not rollback for single row error
+                    
                 except Exception as row_error:
                     logging.error(f"Unexpected error processing row {row_num}: {row} - {row_error}")
                     skipped_count += 1
-                    # Continue with next row
+                    
 
             conn.commit()
             logging.info(f"Finished importing operadoras. Inserted: {inserted_count}, Skipped: {skipped_count}")
@@ -173,7 +171,7 @@ def import_operadoras(conn, file_path):
     except Exception as e:
         logging.error(f"Error importing operadoras: {e}")
         if conn:
-             conn.rollback() # Rollback transaction on major error during import process
+             conn.rollback() 
     finally:
         if cursor:
             cursor.close()
@@ -189,8 +187,8 @@ def import_demonstracoes_batch(conn, file_path, valid_ans_set, batch_size=1000):
     base_filename = os.path.basename(file_path)
     logging.info(f"Importing demonstracoes from: {base_filename}, checking against {len(valid_ans_set)} valid ANS.")
     inserted_count = 0
-    skipped_invalid_ans = 0 # Counter for rows skipped due to invalid ANS
-    skipped_other = 0       # Counter for rows skipped for other reasons
+    skipped_invalid_ans = 0 
+    skipped_other = 0       
     batch = []
     cursor = None
     file_succeeded = True
@@ -215,13 +213,12 @@ def import_demonstracoes_batch(conn, file_path, valid_ans_set, batch_size=1000):
                     reg_ans_str = row.get('REG_ANS')
                     reg_ans = int(reg_ans_str) if reg_ans_str and reg_ans_str.isdigit() else None
 
-                    # ---!!! CHECK FOR VALID REG_ANS FIRST !!!---
                     if reg_ans not in valid_ans_set:
                         # Log less frequently to avoid flooding for many invalid rows
                         if skipped_invalid_ans % 1000 == 0: # Log every 1000 skips
                              logging.debug(f"Skipping row {row_num} in {base_filename}: REG_ANS {reg_ans} not in valid set. (Sample log)")
                         skipped_invalid_ans += 1
-                        continue # Skip this row entirely
+                        continue 
 
                     # --- If REG_ANS is valid, proceed with parsing other fields ---
                     data_dt = parse_date(row.get('DATA'))
@@ -259,7 +256,7 @@ def import_demonstracoes_batch(conn, file_path, valid_ans_set, batch_size=1000):
                         batch = []
                     except (psycopg2.DatabaseError, psycopg2.InterfaceError) as db_err:
                         logging.error(f"Database error during batch insert for {base_filename} (near row {row_num}): {db_err}")
-                        # Since we pre-filtered, FK errors are less likely, but could be other issues
+                
                         conn.rollback()
                         logging.warning(f"Transaction rolled back for {base_filename} due to batch error.")
                         file_succeeded = False
@@ -329,7 +326,6 @@ if __name__ == "__main__":
          # --- Pre-fetch valid REGISTRO_ANS values AFTER operators are imported ---
         try:
             cursor = connection.cursor()
-            # Ensure correct quoting if the column name is case-sensitive or reserved
             cursor.execute('SELECT "registro_ans" FROM operadoras')
             # Fetch all results and add the first element of each row (the ID) to the set
             valid_ans_set = {row[0] for row in cursor.fetchall()}
@@ -339,7 +335,7 @@ if __name__ == "__main__":
                  logging.warning("No valid REG_ANS values found in operadoras table. Accounting import might skip all rows.")
         except Exception as fetch_err:
             logging.error(f"Failed to fetch REG_ANS values from operadoras table: {fetch_err}")
-            # Decide if you want to proceed without the check or exit
+        
             raise SystemExit("Cannot proceed without valid ANS list.")
 
         # --- Import Demonstracoes Contabeis ---

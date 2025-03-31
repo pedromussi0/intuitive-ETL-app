@@ -1,5 +1,6 @@
 .env
 services/venv
+<<<<<<< Updated upstream
 .env
 **/__pycache__/
 *.pyc
@@ -14,3 +15,7 @@ data/raw/ # Usually large and downloaded on demand
 data/processed/
 *.log
 db_source
+=======
+*.__pycache__/
+*.pyc
+>>>>>>> Stashed changes
