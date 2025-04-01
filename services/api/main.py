@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import logging
 from logging.config import dictConfig
 import uvicorn 
-
+from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import operators
 from api.database import connect_db, disconnect_db
@@ -26,12 +26,24 @@ async def lifespan(app: FastAPI):
     await disconnect_db()
 # ---
 
-# Create FastAPI app instance with lifespan manager
 app = FastAPI(
     title="Intuitive Care ANS API",
     description="API for accessing and searching ANS Operator Data",
     version="1.0.0",
-    lifespan=lifespan # Use the lifespan context manager
+    lifespan=lifespan 
+)
+
+origins = [
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET"], # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"], 
 )
 
 # Include routers
