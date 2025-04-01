@@ -127,7 +127,7 @@ def download_operator_data(base_url, target_dir):
     """Downloads the active operators CSV file."""
     logging.info(f"Starting download of operator data from {base_url}")
     try:
-        headers = {'User-Agent': 'Mozilla/5.0'} # Mimic browser
+        headers = {'User-Agent': 'Mozilla/5.0'}
         response = requests.get(base_url, headers=headers, timeout=30)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -136,7 +136,7 @@ def download_operator_data(base_url, target_dir):
         links = soup.find_all('a')
         # Look for specific filename if known, otherwise first csv
         # Example: Find 'Relatorio_cadop.csv' specifically
-        known_filename = 'Relatorio_cadop.csv' # Adjust if filename changes
+        known_filename = 'Relatorio_cadop.csv' # Known filename to look for
         found = False
         for link in links:
             href = link.get('href')

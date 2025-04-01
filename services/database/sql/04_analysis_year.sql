@@ -1,6 +1,4 @@
--- services/database/sql/04_analysis_year.sql
 -- Top 10 operadoras com maiores despesas em "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS ..." no último ano completo disponível.
--- Definition of "last year": The calendar year *before* the year of the latest data entry.
 
 WITH LatestDataYear AS (
     -- Find the year of the latest data entry
@@ -20,7 +18,7 @@ YearlyExpenses AS (
     FROM demonstracoes_contabeis dc
     JOIN TargetYear ty ON EXTRACT(YEAR FROM dc.DATA) = ty.analysis_year
     WHERE
-        dc.DESCRICAO LIKE '%SINISTROS%'
+        dc.DESCRICAO = 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR '
     GROUP BY
         dc.REGISTRO_ANS
 )

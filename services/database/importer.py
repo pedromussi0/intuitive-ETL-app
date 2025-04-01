@@ -105,10 +105,6 @@ def import_operadoras(conn, file_path):
 
         with open(file_path, mode='r', encoding=FILE_ENCODING) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=DELIMITER)
-
-            # Dynamically build the SQL statement based on CSV headers and table columns
-            # Get table columns (this requires a query) - less ideal performance-wise
-            # Or assume schema and CSV match the predefined list:
             sql_columns = [
                 "Registro_ANS", "CNPJ", "Razao_Social", "Nome_Fantasia", "Modalidade",
                 "Logradouro", "Numero", "Complemento", "Bairro", "Cidade", "UF", "CEP", "DDD",
@@ -121,7 +117,6 @@ def import_operadoras(conn, file_path):
                 VALUES ({placeholders})
                 ON CONFLICT (Registro_ANS) DO NOTHING;
             """
-            
 
             for row_num, row in enumerate(reader, 1):
                 try:
@@ -214,11 +209,10 @@ def import_demonstracoes_batch(conn, file_path, valid_ans_set, batch_size=1000):
                     reg_ans = int(reg_ans_str) if reg_ans_str and reg_ans_str.isdigit() else None
 
                     if reg_ans not in valid_ans_set:
-                        # Log less frequently to avoid flooding for many invalid rows
                         if skipped_invalid_ans % 1000 == 0: # Log every 1000 skips
                              logging.debug(f"Skipping row {row_num} in {base_filename}: REG_ANS {reg_ans} not in valid set. (Sample log)")
                         skipped_invalid_ans += 1
-                        continue 
+                        continue
 
                     # --- If REG_ANS is valid, proceed with parsing other fields ---
                     data_dt = parse_date(row.get('DATA'))
@@ -302,7 +296,7 @@ def import_demonstracoes_batch(conn, file_path, valid_ans_set, batch_size=1000):
         logging.error(f"General error processing file {base_filename}: {e}")
         if conn and not conn.autocommit:
              try: conn.rollback()
-             except Exception: pass # Ignore rollback error if connection already closed etc.
+             except Exception: pass 
         return False
     finally:
         if cursor:

@@ -1,4 +1,3 @@
--- services/database/sql/03_analysis_quarter.sql
 -- Top 10 operadoras com maiores despesas em "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS ..." no último trimestre disponível.
 
 -- Find the latest date (end of quarter) available in the data
@@ -14,10 +13,7 @@ QuarterlyExpenses AS (
     FROM demonstracoes_contabeis dc
     JOIN LatestQuarter lq ON dc.DATA = lq.latest_data
     WHERE
-        -- IMPORTANT: Verify the EXACT description string in your data
         dc.DESCRICAO = 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS  DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR '
-        -- Use LIKE if the description might have variations or extra spaces:
-        -- dc.DESCRICAO LIKE 'EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR%'
     GROUP BY
         dc.REGISTRO_ANS
 )
