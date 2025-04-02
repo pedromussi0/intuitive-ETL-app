@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15 
+    image: postgres:15
     container_name: intuitive_postgres_db
     restart: unless-stopped
     environment:
@@ -8,10 +8,56 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "${DB_PORT_HOST}:5432" # Expose PostgreSQL port to host machine
+      - "${DB_PORT_HOST:-5433}:5432" 
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persist data
-      - ./services/database/sql:/docker-entrypoint-initdb.d # Executes *.sql scripts on first run
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - intuitive-net
+
+  api:
+    container_name: intuitive_api
+    build:
+      context: ./services 
+      dockerfile: Dockerfile 
+    restart: unless-stopped
+    ports:
+      - "${API_PORT_HOST:-8000}:8000" 
+    volumes:
+      # Mount source code for API live-reloading during development
+      - ./services/api:/app/api
+      # Mount the project's data directory into the container at /app/data
+      # This allows downloader/importer (run via this container) to access it
+      - ./data:/app/data
+      # If database.py or others need files outside services/api, mount them too
+      # e.g. - ./services/database:/app/database # If needed
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432 # Internal PostgreSQL port
+      # ---
+    depends_on:
+      - db 
+    networks:
+      - intuitive-net
+
+  frontend:
+    container_name: intuitive_frontend
+    build:
+      context: ./frontend 
+      dockerfile: Dockerfile 
+      args:
+        VITE_API_BASE_URL_ARG: ${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT_HOST:-8080}:80"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
     networks:
       - intuitive-net
 
