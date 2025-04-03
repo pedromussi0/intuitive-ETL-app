@@ -22,10 +22,10 @@ try:
         create_zip,
         create_directories,
         RAW_DATA_DIR,
-        DEFAULT_ZIP_FILENAME
+        DEFAULT_ZIP_FILENAME,
     )
 except ImportError:
-     # Fallback for running script directly
+    # Fallback for running script directly
     from scraper_utils import (
         fetch_page,
         find_pdf_links,
@@ -33,7 +33,7 @@ except ImportError:
         create_zip,
         create_directories,
         RAW_DATA_DIR,
-        DEFAULT_ZIP_FILENAME
+        DEFAULT_ZIP_FILENAME,
     )
 
 
@@ -41,6 +41,7 @@ except ImportError:
 TARGET_URL = "https://www.gov.br/ans/pt-br/acesso-a-informacao/participacao-da-sociedade/atualizacao-do-rol-de-procedimentos"
 
 # --- Main Execution Logic ---
+
 
 def run_scraper():
     """Main function to orchestrate the scraping process."""
@@ -61,8 +62,10 @@ def run_scraper():
     pdf_links = find_pdf_links(html_content, TARGET_URL)
 
     if not pdf_links or len(pdf_links) < 2:
-        logging.error(f"Aborting script: Could not find links for both Anexo I and Anexo II. Found: {pdf_links}")
-        return False # Exit if we didn't find both required links
+        logging.error(
+            f"Aborting script: Could not find links for both Anexo I and Anexo II. Found: {pdf_links}"
+        )
+        return False  # Exit if we didn't find both required links
 
     logging.info(f"Found PDF links: {pdf_links}")
 
@@ -79,12 +82,12 @@ def run_scraper():
         else:
             logging.error(f"Failed to download {name}. Aborting zip creation.")
             download_successful = False
-            # Decide if you want to stop immediately or try downloading others
-            # break # Uncomment to stop immediately on first download failure
 
     if not download_successful or len(downloaded_files) != len(pdf_links):
-         logging.error("Aborting script: Not all required PDFs were downloaded successfully.")
-         return False
+        logging.error(
+            "Aborting script: Not all required PDFs were downloaded successfully."
+        )
+        return False
 
     # 4. Create the ZIP archive
     logging.info("Creating ZIP archive...")
@@ -96,6 +99,7 @@ def run_scraper():
     else:
         logging.error("--- Scraper finished with errors (ZIP creation failed) ---")
         return False
+
 
 if __name__ == "__main__":
     run_scraper()
