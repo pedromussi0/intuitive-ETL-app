@@ -1,6 +1,5 @@
 .env
 services/venv
-<<<<<<< Updated upstream
 .env
 **/__pycache__/
 *.pyc
@@ -11,11 +10,9 @@ dist/
 *.egg-info/
 venv/
 .vscode/
-data/raw/ # Usually large and downloaded on demand
-data/processed/
+data/raw/ 
 *.log
 db_source
 =======
 *.__pycache__/
 *.pyc
->>>>>>> Stashed changes
