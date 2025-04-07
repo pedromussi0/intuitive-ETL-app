@@ -32,10 +32,10 @@ Todo o ambiente é configurado para rodar de forma containerizada utilizando Doc
 *   **Implementação:**
     *   `scraper_utils.py`: Contém funções auxiliares para:
         *   Criar diretórios (`create_directories`).
-        *   Buscar conteúdo HTML de uma URL com retentativas (`fetch_page` usando `requests`).
-        *   Encontrar links específicos de PDF no HTML (`find_pdf_links` usando `BeautifulSoup` e `lxml`, procurando por "Anexo I" e "Anexo II").
-        *   Baixar um arquivo de uma URL com retentativas (`download_file` usando `requests`).
-        *   Criar um arquivo ZIP a partir de uma lista de arquivos (`create_zip` usando `zipfile`).
+        *   Buscar conteúdo HTML de uma UR.
+        *   Encontrar links específicos de PDF no HTML.
+        *   Baixar um arquivo de uma URL com retentativas.
+        *   Criar um arquivo ZIP a partir de uma lista de arquivos.
     *   `main.py`: Orquestra o processo chamando as funções do `scraper_utils` na sequência correta (criar dirs -> buscar página -> achar links -> baixar arquivos -> zipar).
 *   **Resultado:** Arquivo `data/processed/Anexos_Rol.zip` contendo os PDFs `anexo_i.pdf` e `anexo_ii.pdf` baixados.
 
