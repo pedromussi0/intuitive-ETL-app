@@ -45,7 +45,7 @@ Todo o ambiente é configurado para rodar de forma containerizada utilizando Doc
 *   **Diretório:** [`services/transformer/`](services/transformer/)
 *   **Objetivo:** Extrair a tabela "Rol de Procedimentos e Eventos em Saúde" do PDF `Anexo I` (obtido na  1), limpar os dados, substituir abreviações ("OD", "AMB") por seus significados completos, e salvar o resultado em um arquivo CSV estruturado, compactado como `Teste_pedro_mussi.zip`.
 *   **Implementação:**
-    *   `pdf_parser.py`: Utiliza `pdfplumber` para abrir o `anexo_i.pdf` (localizado em `data/raw/`) e extrair todas as tabelas a partir da página 3, limpando o texto das células.
+    *   `pdf_parser.py`: Utiliza pdfplumber para abrir o `anexo_i.pdf` (localizado em `data/raw/`) e extrair todas as tabelas a partir da página 3, limpando o texto das células.
     *   `data_cleaner.py`: Recebe as tabelas extraídas, identifica a linha de cabeçalho (procurando por colunas comuns), consolida as linhas de dados válidas (com mesmo número de colunas do cabeçalho) e aplica a substituição dos textos "OD" e "AMB" pelas descrições completas nas colunas correspondentes.
     *   `main.py`: Coordena o processo: chama o parser, o cleaner/transformer, salva o resultado em `data/processed/rol_procedimentos.csv` (delimitador `;`), e compacta este CSV no arquivo `data/processed/Teste_pedro_mussi.zip`.
 *   **Resultado:** Arquivo `data/processed/Teste_pedro_mussi.zip`.
@@ -60,9 +60,9 @@ Todo o ambiente é configurado para rodar de forma containerizada utilizando Doc
 *   **Objetivo:** Baixar dados públicos adicionais da ANS (Demonstrações Contábeis, Cadastro de Operadoras), estruturar um banco de dados PostgreSQL, importar esses dados e realizar consultas analíticas.
 *   **Implementação:**
     *   `downloader.py`: Baixa os arquivos CSV/ZIP das Demonstrações Contábeis dos últimos 2 anos e o CSV do Cadastro de Operadoras (`Relatorio_cadop.csv`) do FTP da ANS para `data/raw/db_source/`.
-    *   `sql/01_schema.sql`: Script SQL (`CREATE TABLE IF NOT EXISTS`) para definir as tabelas `operadoras` e `demonstracoes_contabeis`.
-    *   `importer.py`: Script Python (`psycopg2`) que lê os CSVs baixados , realiza `TRUNCATE` e os importa para as tabelas do PostgreSQL, **validando a existência do `Registro_ANS`** na tabela `operadoras` antes de inserir em `demonstracoes_contabeis` para garantir integridade referencial (linhas órfãs são ignoradas). Usa inserção em lote.
-    *   `sql/05_fts_setup.sql`: Script SQL para configurar o Full-Text Search (FTS) na tabela `operadoras` (coluna `fts_document`, trigger `tsvectorupdate`, índice GIN).
+    *   `sql/01_schema.sql`: Script SQL para definir as tabelas `operadoras` e `demonstracoes_contabeis`.
+    *   `importer.py`: Script Python que lê os CSVs baixados , realiza TRUNCATE e os importa para as tabelas do PostgreSQL, **validando a existência do `Registro_ANS`** na tabela `operadoras` antes de inserir em `demonstracoes_contabeis` para garantir integridade referencial (linhas órfãs são ignoradas). Usa inserção em lote.
+    *   `sql/05_fts_setup.sql`: Script SQL para configurar o Full-Text Search (FTS) na tabela `operadoras`.
     *   `sql/03_analysis_quarter.sql` e `sql/04_analysis_year.sql`: Queries SQL que calculam as 10 operadoras com maiores despesas em "EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS..." no último trimestre e no último ano completo, respectivamente.
 *   **Resultado:** Banco de dados PostgreSQL populado e pronto para consulta; resultados das queries analíticas.
 
@@ -81,7 +81,7 @@ Todo o ambiente é configurado para rodar de forma containerizada utilizando Doc
 *   **Implementação:**
     *   Servidor FastAPI assíncrono com gestão de ciclo de vida para pool de conexões DB (`main.py`, `database.py`).
     *   Endpoint de busca que utiliza parâmetros `q`, `limit`, `offset` (`routers/operators.py`).
-    *   Lógica de serviço (`services/search_service.py`) que consulta o PostgreSQL usando **Full-Text Search (FTS)** configurado na  3 (via `plainto_tsquery`, `ts_rank_cd`) e retorna resultados paginados e ordenados por relevância. Trata a conversão `BIGINT` -> `String` para o CNPJ.
+    *   Lógica de serviço (`services/search_service.py`) que consulta o PostgreSQL usando **Full-Text Search (FTS)**  e retorna resultados paginados e ordenados por relevância.
     *   Modelos Pydantic para respostas (`models/operator.py`).
     *   Configuração CORS para acesso do frontend.
 
